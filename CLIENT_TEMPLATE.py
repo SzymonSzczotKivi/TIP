@@ -30,7 +30,7 @@ var_client_status = StringVar()
 var_in_status = StringVar()
 
 # test
-var_ip.set("192.168.8.127")
+var_ip.set("192.168.8.148")
 var_destinated_port.set("6000")
 var_connected_to.set("Not connected")
 var_server_status.set("Server Stopped")
@@ -55,7 +55,8 @@ connections = []
 
 server_s = [socket.socket(socket.AF_INET, socket.SOCK_STREAM)]
 
-ip = socket.gethostbyname(socket.gethostname())
+print(socket.gethostname())
+ip = "192.168.8.119"
 
 
 def start_serv():
@@ -119,6 +120,7 @@ def accept_connections(port):
     while True:
         try:
             c, addr = server_s[0].accept()
+            print(addr)
 
             connections.append(c)
 
@@ -144,13 +146,19 @@ def handle_client(c, addr):
             print(data[0])
 
             playing_stream.write(data[1:])
+            print("WRITED")
 
-            send_data = recording_stream.read(1024)
-
+            send_data = recording_stream.read(1024, exception_on_overflow=False)
+            print(send_data)
+            # print("SENDED")
+            time.sleep(0.001)
             talk(c, send_data)
 
-        except socket.error:
+        except socket.error as e:
+            print("CLOSING")
             c.close()
+            time.sleep(2)
+            print(e)
 
 
 ########### CLIENT ###############
