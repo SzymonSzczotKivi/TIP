@@ -41,7 +41,7 @@ var_in_status.set("1")
 chunk_size = 1024
 audio_format = pyaudio.paInt16
 channels = 1
-rate = 20000
+rate = 40000
 
 p = pyaudio.PyAudio()
 
@@ -56,7 +56,7 @@ connections = []
 server_s = [socket.socket(socket.AF_INET, socket.SOCK_STREAM)]
 
 print(socket.gethostname())
-ip = "192.168.8.119"
+ip = "192.168.8.148"
 
 
 def start_serv():
@@ -120,7 +120,6 @@ def accept_connections(port):
     while True:
         try:
             c, addr = server_s[0].accept()
-            print(addr)
 
             connections.append(c)
 
@@ -140,25 +139,34 @@ def talk(c, data):
 def handle_client(c, addr):
     print(bcolors.OKBLUE + "Handling new connection" + bcolors.ENDC)
 
-    while 1:
-        try:
-            data = c.recv(1025)
-            print(data[0])
+    def receive():
+        while 1:
+            data = c.recv(20000)
+            # print(data[0])
 
-            playing_stream.write(data[1:])
+            playing_stream.write(data)
+
             print("WRITED")
+            print(data)
 
-            send_data = recording_stream.read(1024, exception_on_overflow=False)
-            print(send_data)
-            # print("SENDED")
-            time.sleep(0.001)
+    def send():
+        while 1:
+            send_data = recording_stream.read(20000, exception_on_overflow=False)
+            print("SENDED")
+            time.sleep(0.01)
             talk(c, send_data)
 
-        except socket.error as e:
-            print("CLOSING")
-            c.close()
-            time.sleep(2)
-            print(e)
+    r_thread = threading.Thread(target=receive).start()
+    s_thread = threading.Thread(target=send).start()
+    # while 1:
+    #     try:
+    #
+    #
+    #     except socket.error as e:
+    #         print("CLOSING")
+    #         c.close()
+    #         time.sleep(2)
+    #         print(e)
 
 
 ########### CLIENT ###############
@@ -190,7 +198,8 @@ def start_cli():
             var_client_status.set("Client connected to " + target_ip)
 
             break
-        except:
+        except Exception as e:
+            print(e)
             print("Couldn't connect to server")
 
     print(bcolors.OKBLUE + "Connection established" + bcolors.ENDC)
@@ -210,9 +219,9 @@ def receive_server_data():
     print("receiving")
     while True:
         try:
-            data = client_s[0].recv(1024)
-
-            playing_stream.write(data)
+            # data = client_s[0].recv(1024)
+            pass
+            # playing_stream.write(data)
         except:
             pass
 
@@ -221,11 +230,12 @@ def send_data_to_server():
     print("sending")
     while True:
         try:
-            data = recording_stream.read(1024)
-            print("PRINTING BIANRY")
-            print(data[0])
-
-            client_s[0].send(data)
+            pass
+            # data = recording_stream.read(1024)
+            # print("PRINTING BIANRY")
+            # print(data[0])
+            #
+            # client_s[0].send(data)
         except:
             pass
 
